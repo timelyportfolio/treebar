@@ -19,7 +19,7 @@ function constructor(skeleton) {
   var dispatch = skeleton.getDispatcher();
   var options = skeleton.options();
 
-  layers.create(['content', 'x-axis', 'y-axis']);
+  layers.create(['x-axis', 'y-axis', 'content']);
 
   var x0 = d3.scaleBand()
     .range([0, skeleton.getInnerWidth()]);
@@ -42,9 +42,9 @@ function constructor(skeleton) {
     var width = skeleton.getInnerWidth();
     var height = skeleton.getInnerHeight();
     
-    var root = d3.hierarchy(data).sum(function (d) { return d[options.key] });
-    var yearData = root.children;
-    yearData.sort(function (a, b) { return a.data.year - b.data.year });
+    var root = d3.hierarchy(data).sum(function (d) { return d.value });
+    var depth1Data = root.children;
+    depth1Data.sort(function (a, b) { return a.data.id - b.data.id });
     
     x0.domain(d3.extent(data, function(d){return d.x;}))
       .range([0, skeleton.getInnerWidth()]);
@@ -65,14 +65,14 @@ function constructor(skeleton) {
     selection.merge(sEnter)
 
 
-    x0.domain(yearData.map(function (d) { return d.data.year }).sort())
+    x0.domain(depth1Data.map(function (d) { return d.data.id }).sort())
       .padding(0.15);
 
     x1.domain(['Imports', 'Exports'])
       .rangeRound([0, x0.bandwidth()])
       .paddingInner(0.1);
 
-    y.domain([0, d3.max(yearData, function (d) {
+    y.domain([0, d3.max(depth1Data, function (d) {
           return d3.max(d.children, function (e) { return e.value })
       })]).nice();
 
@@ -90,23 +90,22 @@ function constructor(skeleton) {
 
     layers.get('x-axis')
       .attr('transform', 'translate(0,' + (skeleton.getInnerHeight()+22) + ')')
+      .classed('axis', true)
       .call(x0Axis);
-      
-    layers.get('x-axis')
-      .call(x1Axis)
 
     layers.get('y-axis')
+      .classed('axis', true)
       .call(yAxis);
 
-    var years = layers.get('x-axis').selectAll('.year')
-      .data(yearData, function (d) { return d.data.year })
+    var depth1 = svg.selectAll('.depth1')
+      .data(depth1Data, function (d) { return d.data.id })
       .enter().append('g')
-      .attr('class', 'year')
+      .attr('class', 'depth1')
       .attr('transform', function (d) {
-          return 'translate(' + x0(d.data.year) + ',0)'
+          return 'translate(' + x0(d.data.id) + ',0)'
       });
 
-    years.append('g')
+    depth1.append('g')
       .attr('class', 'x1 axis')
       .attr('transform', 'translate(0,' + height + ')')
       .call(x1Axis)
@@ -114,7 +113,7 @@ function constructor(skeleton) {
     update()
 
     function sum(d) {
-        return !options.country || options.country === d.country ? d[options.key] : 0
+        return !options.country || options.country === d.id ? d.value : 0
     }
 
     function update() {
@@ -122,17 +121,17 @@ function constructor(skeleton) {
 
         var t = d3.transition()
 
-        var typeData = d3.merge(yearData.map(function (d) { return d.children }))
+        var depth2Data = d3.merge(depth1Data.map(function (d) { return d.children }))
 
-        y.domain([0, d3.max(typeData.map(function (d) { return d.value }))]).nice()
+        y.domain([0, d3.max(depth2Data.map(function (d) { return d.value }))]).nice()
 
         // We use a copied Y scale to invert the range for display purposes
         yAxis.scale(y.copy().range([height, 0]))
         layers.get('y-axis').transition(t).call(yAxis)
 
-        var types = years.selectAll('.type')
+        var depth2 = depth1.selectAll('.depth2')
             .data(function (d) { return d.children },
-                  function (d) { return d.data.type })
+                  function (d) { return d.data.id })
             .each(function (d) {
                 // UPDATE
                 // The copied branches are orphaned from the larger hierarchy, and must be
@@ -143,18 +142,18 @@ function constructor(skeleton) {
                 })
             })
 
-        types = types.enter().append('g')
-            .attr('class', 'type')
+        depth2 = depth2.enter().append('g')
+            .attr('class', 'depth2')
             .attr('transform', function (d) {
-                return 'translate(' + x1(d.data.type) + ',' + height + ')'
+                return 'translate(' + x1(d.data.id) + ',' + height + ')'
             })
             .each(function (d) {
                 // ENTER
                 // Note that we can use .each on selections as a way to perform operations
-                // at a given depth of the hierarchy tree.
+            // at a given depth of the hierarchy tree.
                 d.children.sort(function (a, b) {
-                    //return orderedContinents.indexOf(b.data.continent) -
-                    //    orderedContinents.indexOf(a.data.continent)
+                    //return orderedContinents.indexOf(b.data.id) -
+                    //    orderedContinents.indexOf(a.data.id)
                 })
                 d.children.forEach(function (d) {
                     d.sort(function (a, b) { return b.value - a.value })
@@ -165,7 +164,7 @@ function constructor(skeleton) {
                 // child node, which creates a new tree from the branch.
                 d.treemapRoot = d.copy()
             })
-            .merge(types)
+            .merge(depth2)
             .each(function (d) {
                 // UPDATE + ENTER
                 d.treemap.size([x1.bandwidth(), y(d.value)])(d.treemapRoot)
@@ -175,58 +174,58 @@ function constructor(skeleton) {
         // adds an index property to each node that we'll use for the transition delay.
         root.each(function (d) { d.index = d.parent ? d.parent.children.indexOf(d) : 0 })
 
-        types.transition(t)
+        depth2.transition(t)
             .delay(function (d, i) { return d.parent.index * 150 + i * 50 })
             .attr('transform', function (d) {
-                return 'translate(' + x1(d.data.type) + ',' + (height - y(d.value)) + ')'
+                return 'translate(' + x1(d.data.id) + ',' + (height - y(d.value)) + ')'
             })
 
-        var continents = types.selectAll('.continent')
+        var depth3 = depth2.selectAll('.depth3')
             // Note that we're using our copied branch.
             .data(function (d) { return d.treemapRoot.children },
-                  function (d) { return d.data.continent })
+                  function (d) { return d.data.id })
 
-        continents = continents.enter().append('g')
-            .attr('class', 'continent')
-            .merge(continents)
+        depth3 = depth3.enter().append('g')
+            .attr('class', 'depth3')
+            .merge(depth3)
 
-        var countries = continents.selectAll('.country')
+        var depth4 = depth3.selectAll('.depth4')
             .data(function (d) { return d.children },
-                  function (d) { return d.data.country })
+                  function (d) { return d.data.id })
 
-        var enterCountries = countries.enter().append('rect')
-            .attr('class', 'country')
+        var enterDepth4 = depth4.enter().append('rect')
+            .attr('class', 'depth4')
             .attr('x', function (d) { return d.value ? d.x0 : x1.bandwidth() / 2 })
             .attr('width', function (d) { return d.value ? d.x1 - d.x0 : 0 })
             .attr('y', 0)
             .attr('height', 0)
-            .style('fill', function (d) { return color(d.parent.data.continent) })
+            .style('fill', function (d) { return color(d.parent.data.id) })
 
-        countries = countries.merge(enterCountries)
+        depth4 = depth4.merge(enterDepth4)
 
-        enterCountries
+        enterDepth4
             .on('mouseover', function (d) {
                 svg.classed('hover-active', true)
-                countries.classed('hover', function (e) {
-                    return e.data.country === d.data.country
+                depth4.classed('hover', function (e) {
+                    return e.data.id === d.data.id
                 })
             })
             .on('mouseout', function () {
                 svg.classed('hover-active', false)
-                countries.classed('hover', false)
+                depth4.classed('hover', false)
             })
             .on('click', function (d) {
-                options.country = options.country === d.data.country ? null : d.data.country
+                options.country = options.country === d.data.id ? null : d.data.id
                 update()
             })
             .append('title')
-            .text(function (d) { return d.data.country })
+            .text(function (d) { return d.data.id })
 
-        countries.filter(function (d) { return d.data.country === options.country })
+        depth4.filter(function (d) { return d.data.id === options.country })
             .each(function (d) { d3.select(this.parentNode).raise() })
             .raise()
 
-        countries
+        depth4
             .transition(t)
             .attr('x', function (d) { return d.value ? d.x0 : x1.bandwidth() / 2 })
             .attr('width', function (d) { return d.value ? d.x1 - d.x0 : 0 })

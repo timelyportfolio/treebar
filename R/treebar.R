@@ -5,11 +5,11 @@
 #' @import htmlwidgets
 #'
 #' @export
-treebar <- function(message, width = NULL, height = NULL, elementId = NULL) {
+treebar <- function(data=NULL, ..., width = NULL, height = NULL, elementId = NULL) {
 
   # forward options using x
   x = list(
-    message = message
+    data = data
   )
 
   # create widget

@@ -6,25 +6,32 @@ HTMLWidgets.widget({
 
   factory: function(el, width, height) {
 
-    // TODO: define shared variables for this instance
+    var instance = {};
 
     return {
 
       renderValue: function(x) {
-
-        d3.json("lib/treebard3-0.1/data.json", draw);
-        function draw(error, data) {
-          if(error) throw(error);
+        
+        instance.x = x;
+        
+        // ugly and will fix but for now
+        //   empty and re-render in dynamic
+        el.innerHTML = "";
+          var treebar = new Treebar(el);
           
-          var treebar = new Treebar(el).data(data);
-        }
+          treebar
+            .width(el.getBoundingClientRect().width)
+            .height(el.getBoundingClientRect().height)
+            .data(x.data);
       },
 
       resize: function(width, height) {
 
-        // TODO: code to re-render the widget with a new size
+        this.renderValue(instance.x);
 
-      }
+      },
+      
+      instance: instance
 
     };
   }
