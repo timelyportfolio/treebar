@@ -9,7 +9,9 @@ always_allow_html: yes
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "README-",
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
