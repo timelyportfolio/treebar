@@ -2,7 +2,10 @@ var DEFAULT_OPTIONS = {
   margin: { top: 15, right: 15, bottom: 40, left: 60 },
   width: 960,
   height: 500,
-  color: d3.scaleOrdinal(d3.schemeCategory10)
+  color: d3.scaleOrdinal(d3.schemeCategory10),
+  id: "id",
+  value: "value",
+  tile: "Squarify"
 };
 
 var CUSTOM_EVENTS = [];
@@ -43,11 +46,11 @@ function constructor(skeleton) {
     var height = skeleton.getInnerHeight();
     
     var root = d3.hierarchy(data)
-      .sum(function (d) { return d.value });
+      .sum(function (d) { return d[options.value] });
       
     var depth1Data = root.children;
     depth1Data.sort(function (a, b) {
-      return a.data.id - b.data.id
+      return a.data[options.id] - b.data[options.id]
     });
     
     var svg = layers.get('content');
@@ -63,7 +66,7 @@ function constructor(skeleton) {
 
     selection.merge(sEnter)
 
-    x0.domain(depth1Data.map(function (d) { return d.data.id }).sort())
+    x0.domain(depth1Data.map(function (d) { return d.data[options.id] }).sort())
       .range([0, width])
       .padding(0.15);
 
@@ -72,7 +75,7 @@ function constructor(skeleton) {
         d3.merge(depth1Data.map(
           function (d) {
             var ids = d.data.children.map(function(dd){
-              return dd.id;
+              return dd[options.id];
             });
             return ids;
           }
@@ -107,11 +110,11 @@ function constructor(skeleton) {
       .call(yAxis);
 
     var depth1 = svg.selectAll('.depth1')
-      .data(depth1Data, function (d) { return d.data.id })
+      .data(depth1Data, function (d) { return d.data[options.id] })
       .enter().append('g')
       .attr('class', 'depth1')
       .attr('transform', function (d) {
-          return 'translate(' + x0(d.data.id) + ',0)'
+          return 'translate(' + x0(d.data[options.id]) + ',0)'
       });
 
     depth1.append('g')
@@ -122,7 +125,7 @@ function constructor(skeleton) {
     update()
 
     function sum(d) {
-        return !options._selected || options._selected === d.id ? d.value : 0
+        return !options._selected || options._selected === d[options.id] ? d[options.value] : 0
     }
 
     function update() {
@@ -131,7 +134,13 @@ function constructor(skeleton) {
         var t = d3.transition()
 
         var depth2Data = d3.merge(depth1Data.map(function (d) { return d.children }))
-
+        
+        var depth2Ids = d3.set(
+          depth2Data.map(
+            function(d){return d.data[options.id]}
+          )
+        ).values().sort(d3.ascending);
+        
         y.domain([0, d3.max(depth2Data.map(function (d) { return d.value }))]).nice()
 
         // We use a copied Y scale to invert the range for display purposes
@@ -143,7 +152,7 @@ function constructor(skeleton) {
                 return d.children
               },
               function (d) {
-                return d.data.id;
+                return d.data[options.id];
               }
             )
             .each(function (d) {
@@ -159,16 +168,20 @@ function constructor(skeleton) {
         depth2 = depth2.enter().append('g')
             .attr('class', 'depth2')
             .attr('transform', function (d) {
-                return 'translate(' + x1(d.data.id) + ',' + height + ')'
+                return 'translate(' + x1(d.data[options.id]) + ',' + height + ')'
             })
             .each(function (d) {
                 // ENTER
                 // Note that we can use .each on selections as a way to perform operations
             // at a given depth of the hierarchy tree.
+                d.children.sort(function (a, b) {
+                    return depth2Ids.indexOf(b.data[options.id]) -
+                        depth2Ids.indexOf(a.data[options.id])
+                })
                 d.children.forEach(function (d) {
                     d.sort(function (a, b) { return b.value - a.value })
                 })
-                d.treemap = d3.treemap().tile(d3.treemapResquarify)
+                d.treemap = d3.treemap().tile(d3["treemap" + options.tile]);
 
                 // The treemap layout must be given a root node, so we make a copy of our
                 // child node, which creates a new tree from the branch.
@@ -189,7 +202,7 @@ function constructor(skeleton) {
         depth2.transition(t)
             .delay(function (d, i) { return d.parent.index * 150 + i * 50 })
             .attr('transform', function (d) {
-                return 'translate(' + x1(d.data.id) + ',' + (height - y(d.value)) + ')'
+                return 'translate(' + x1(d.data[options.id]) + ',' + (height - y(d.value)) + ')'
             })
 
         var depth3 = depth2.selectAll('.depth3')
@@ -199,7 +212,7 @@ function constructor(skeleton) {
                 return d.treemapRoot.children
               },
               function (d) {
-                return d.data.id
+                return d.data[options.id]
               }
             )
 
@@ -212,7 +225,7 @@ function constructor(skeleton) {
               return d.children
             },
             function (d) {
-              return d.data.id
+              return d.data[options.id]
             })
 
         var enterDepth4 = depth4.enter().append('rect')
@@ -221,7 +234,7 @@ function constructor(skeleton) {
             .attr('width', function (d) { return d.value ? d.x1 - d.x0 : 0 })
             .attr('y', 0)
             .attr('height', 0)
-            .style('fill', function (d) { return color(d.parent.data.id) })
+            .style('fill', function (d) { return color(d.parent.data[options.id]) })
 
         depth4 = depth4.merge(enterDepth4)
 
@@ -229,7 +242,7 @@ function constructor(skeleton) {
             .on('mouseover', function (d) {
                 svg.classed('hover-active', true)
                 depth4.classed('hover', function (e) {
-                    return e.data.id === d.data.id
+                    return e.data[options.id] === d.data[options.id]
                 })
             })
             .on('mouseout', function () {
@@ -237,13 +250,13 @@ function constructor(skeleton) {
                 depth4.classed('hover', false)
             })
             .on('click', function (d) {
-                options._selected = options._selected === d.data.id ? null : d.data.id
+                options._selected = options._selected === d.data[options.id] ? null : d.data[options.id]
                 update()
             })
             .append('title')
-            .text(function (d) { return d.data.id })
+            .text(function (d) { return d.data[options.id] })
 
-        depth4.filter(function (d) { return d.data.id === options._selected })
+        depth4.filter(function (d) { return d.data[options.id] === options._selected })
             .each(function (d) { d3.select(this.parentNode).raise() })
             .raise()
 
