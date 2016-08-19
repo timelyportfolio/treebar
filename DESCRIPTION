@@ -1,9 +1,32 @@
 Package: treebar
 Title: Interactive 'd3.js' Treemap Bar
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Date: 2016-08-18
+Authors@R: c(
+      person(
+        "Mike", "Bostock"
+        , role = c("aut", "cph")
+        , comment = "d3.js library in htmlwidgets/lib, http://d3js.org"
+      ),
+      person(
+        "Chris", "Given"
+        , role = c("aut", "cph")
+        , comment = "stacked treemap bar library in htmlwidgets/lib, https://gist.github.com/cmgiven/4541f6de7b6fbef482aaa43f3a71f8d4"
+      ),
+      person(
+        "Kent", "Russell"
+        , role = c("aut", "cre")
+        , comment = "R interface"
+        , email = "kent.russell@timelyportfolio.com"
+      )
+    )
 Description: What the package does (one paragraph).
-Depends: R (>= 3.3.1)
+Depends: R (>= 3.2.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Imports:
+    htmlwidgets,
+    htmltools,
+Suggests:
+    knitr
