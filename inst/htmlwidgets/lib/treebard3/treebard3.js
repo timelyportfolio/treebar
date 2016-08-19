@@ -1,22 +1,3 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-label {
-    font-family: sans-serif;
-    font-size: 14px;
-    position: absolute;
-    left: 92px; top: 26px;
-}
-.axis .domain { display: none; }
-.axis line { stroke: #ccc; }
-.axis.x0 text { font-weight: 700; }
-.hover-active rect { opacity: .75; }
-.hover-active rect.hover { opacity: 1; }
-</style>
-<body>
-<label><input type="checkbox" id="inflation-adjusted" checked /> Adjust for inflation</label>
-<script src="//d3js.org/d3.v4.min.js"></script>
-<script>
 var margin = { top: 15, right: 15, bottom: 40, left: 60 }
 var width = 960 - margin.left - margin.right
 var height = 500 - margin.top - margin.bottom
@@ -38,7 +19,7 @@ var options = {
     country: null
 }
 
-d3.json('data.json', initialize)
+d3.json('lib/treebard3-0.1/data.json', initialize)
 
 function initialize(error, data) {
     if (error) { throw error }
@@ -233,6 +214,3 @@ function initialize(error, data) {
             .attr('height', function (d) { return d.value ? d.y1 - d.y0 : 0 })
     }
 }
-
-</script>
-</body>
