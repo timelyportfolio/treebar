@@ -8,7 +8,11 @@ var DEFAULT_OPTIONS = {
   tile: "Squarify"
 };
 
-var CUSTOM_EVENTS = [];
+var CUSTOM_EVENTS = [
+  "nodeClick",
+  "nodeMouseover",
+  "nodeMouseout"
+];
 
 var Treebar = d3Kit.factory.createChart(
   DEFAULT_OPTIONS,
@@ -239,18 +243,21 @@ function constructor(skeleton) {
         depth4 = depth4.merge(enterDepth4)
 
         enterDepth4
-            .on('mouseover', function (d) {
+            .on('mouseover', function (d,i) {
                 svg.classed('hover-active', true)
                 depth4.classed('hover', function (e) {
                     return e.data[options.id] === d.data[options.id]
                 })
+                dispatch.apply('nodeMouseover', this, [d,i]);
             })
-            .on('mouseout', function () {
+            .on('mouseout', function (d,i) {
                 svg.classed('hover-active', false)
                 depth4.classed('hover', false)
+                dispatch.apply('nodeMouseout', this, [d,i]); 
             })
-            .on('click', function (d) {
+            .on('click', function (d, i) {
                 options._selected = options._selected === d.data[options.id] ? null : d.data[options.id]
+                dispatch.apply('nodeClick', this, [d,i]);
                 update()
             })
             .append('title')

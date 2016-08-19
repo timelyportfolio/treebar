@@ -10,6 +10,7 @@
 #'
 #' @example ./inst/example/example_replicate.R
 #' @example ./inst/example/example_portfolio.R
+#' @example ./inst/example/example_shiny.R
 #' 
 #' @import htmlwidgets
 #'
