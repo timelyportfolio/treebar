@@ -2,11 +2,19 @@
 % Please edit documentation in R/treebar.R
 \name{treebar}
 \alias{treebar}
-\title{<Add Title>}
+\title{Interactive Zoomable Treemap Bar Charts}
 \usage{
-treebar(message, width = NULL, height = NULL, elementId = NULL)
+treebar(data = NULL, ..., width = NULL, height = NULL, elementId = NULL)
+}
+\arguments{
+\item{data}{\code{string} json data of a four level d3.js hierarchy.
+inflexible now but will improve}
+
+\item{...}{additional arguments currently supports 
+id, name, and tile for customizing your chart}
 }
 \description{
-<Add Description>
+htmlwidget based off Chris Given's
+\href{http://bl.ocks.org/cmgiven/4541f6de7b6fbef482aaa43f3a71f8d4}{Treemap Bar}
 }
 

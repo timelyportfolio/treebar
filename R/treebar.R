@@ -1,6 +1,12 @@
-#' <Add Title>
+#' Interactive Zoomable Treemap Bar Charts
 #'
-#' <Add Description>
+#' htmlwidget based off Chris Given's
+#' \href{http://bl.ocks.org/cmgiven/4541f6de7b6fbef482aaa43f3a71f8d4}{Treemap Bar}
+#'
+#' @param data \code{string} json data of a four level d3.js hierarchy.
+#'   inflexible now but will improve
+#' @param ... additional arguments currently supports 
+#'   id, name, and tile for customizing your chart
 #'
 #' @import htmlwidgets
 #'
@@ -9,7 +15,8 @@ treebar <- function(data=NULL, ..., width = NULL, height = NULL, elementId = NUL
 
   # forward options using x
   x = list(
-    data = data
+    data = data,
+    options = list(...)
   )
 
   # create widget

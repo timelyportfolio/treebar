@@ -13,3 +13,21 @@ json <- str_replace_all(
 data <- fromJSON(json, simplifyDataFrame=FALSE)
 
 treebar(data)
+
+
+# use different key for id and value
+json <- str_replace_all(
+  readLines("./inst/example/data.json"),
+  "(country)|(continent)|(year)|(type)",
+  "name"
+)
+
+json <- str_replace_all(
+  json,
+  "(value)",
+  "size"
+)
+
+data <- fromJSON(json, simplifyDataFrame=FALSE)
+
+treebar(data, value="size", id="name")
