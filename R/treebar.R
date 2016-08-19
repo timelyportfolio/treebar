@@ -8,6 +8,9 @@
 #' @param ... additional arguments currently supports 
 #'   id, name, and tile for customizing your chart
 #'
+#' @example ./inst/example/example_replicate.R
+#' @example ./inst/example/example_portfolio.R
+#' 
 #' @import htmlwidgets
 #'
 #' @export

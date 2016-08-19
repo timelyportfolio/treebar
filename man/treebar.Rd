@@ -17,4 +17,116 @@ id, name, and tile for customizing your chart}
 htmlwidget based off Chris Given's
 \href{http://bl.ocks.org/cmgiven/4541f6de7b6fbef482aaa43f3a71f8d4}{Treemap Bar}
 }
+\examples{
+#devtools::install_github("timelyportfolio/treebar")
+
+library(stringr)
+library(treebar)
+library(jsonlite)
+
+## make it a more generic hierarchy
+##  normally this step is not necessary
+json <- str_replace_all(
+  readLines(system.file("example/data.json",package="treebar")),
+  "(country)|(continent)|(year)|(type)",
+  "id"
+)
+
+data <- fromJSON(json, simplifyDataFrame=FALSE)
+
+treebar(data)
+
+
+# also allows different treemap tiling options
+library(htmltools)
+
+browsable(
+  tagList(
+    lapply(
+      c("Squarify", "Binary", "SliceDice", "Slice", "Dice"),
+      function(tile){
+        tags$div(
+          style = "float:left; display:inline;",
+          tags$h3(tile),
+          treebar(
+            data,
+            tile = tile, 
+            height = 250,
+            width = 400
+          )
+        )
+      }
+    )   
+  )
+)
+
+
+# use different key for id and value
+json <- str_replace_all(
+  readLines("./inst/example/data.json"),
+  "(country)|(continent)|(year)|(type)",
+  "name"
+)
+
+json <- str_replace_all(
+  json,
+  "(value)",
+  "size"
+)
+
+data <- fromJSON(json, simplifyDataFrame=FALSE)
+
+treebar(data, value="size", id="name")
+library(treebar)
+library(data.tree)
+
+portfolio <- data.frame(
+  year = rep(2014:2016, each=8),
+  asset = c(rep("equity",5),rep("fixed",3)),
+  subasset = c("infotech","infotech","energy","energy","telecom","invgrade","invgrade","highyield"),
+  ticker = rep(c("msft","apple","xom","cvx","t","pttrx","vficx","vwehx"),3),
+  value = runif(24,50000,250000),
+  stringsAsFactors = FALSE
+)
+
+portfolio$pathString <- paste(
+  "portfolio", 
+  portfolio$year, 
+  portfolio$asset,
+  portfolio$subasset,
+  portfolio$ticker,
+  sep = "/"
+)
+
+portfolio_tree <- as.Node(portfolio)
+
+treebar(
+  ToListExplicit(portfolio_tree, unname=TRUE),
+  id = "name"
+)
+
+# also allows different tiling options
+library(htmltools)
+
+browsable(
+  tagList(
+    lapply(
+      c("Squarify", "Binary", "SliceDice", "Slice", "Dice"),
+      function(tile){
+        tags$div(
+          style = "float:left; display:inline;",
+          tags$h3(tile),
+          treebar(
+            ToListExplicit(portfolio_tree, unname=TRUE),
+            id = "name",
+            tile = tile, 
+            height = 250,
+            width = 320
+          )
+        )
+      }
+    )   
+  )
+)
+}
 

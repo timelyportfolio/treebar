@@ -25,3 +25,27 @@ treebar(
   ToListExplicit(portfolio_tree, unname=TRUE),
   id = "name"
 )
+
+# also allows different tiling options
+library(htmltools)
+
+browsable(
+  tagList(
+    lapply(
+      c("Squarify", "Binary", "SliceDice", "Slice", "Dice"),
+      function(tile){
+        tags$div(
+          style = "float:left; display:inline;",
+          tags$h3(tile),
+          treebar(
+            ToListExplicit(portfolio_tree, unname=TRUE),
+            id = "name",
+            tile = tile, 
+            height = 250,
+            width = 320
+          )
+        )
+      }
+    )   
+  )
+)
