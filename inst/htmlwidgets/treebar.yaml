@@ -3,6 +3,10 @@ dependencies:
     version: 4.2.2
     src: htmlwidgets/lib/d3
     script: d3.min.js
+  - name: d3kit
+    version: 2.0.0
+    src: htmlwidgets/lib/d3kit
+    script: d3kit.js
   - name: treebard3
     version: 0.1
     src: htmlwidgets/lib/treebard3

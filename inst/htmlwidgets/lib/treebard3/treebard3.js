@@ -1,56 +1,80 @@
-var margin = { top: 15, right: 15, bottom: 40, left: 60 }
-var width = 960 - margin.left - margin.right
-var height = 500 - margin.top - margin.bottom
+var DEFAULT_OPTIONS = {
+  margin: { top: 15, right: 15, bottom: 40, left: 60 },
+  width: 960,
+  height: 500,
+  color: d3.scaleOrdinal(d3.schemeCategory10)
+};
 
-var orderedContinents = ['Asia', 'North America', 'Europe', 'South America', 'Africa', 'Australia']
-var color = d3.scaleOrdinal()
-    .domain(orderedContinents)
-    .range(['#66c2a5', '#fc8d62', '#8da0cb', '#e78ac3', '#a6d854', '#ffd92f'])
+var CUSTOM_EVENTS = [];
 
-var dollarFormat = d3.format('$,')
-var tickFormat = function (n) {
-    return n === 0 ? '$0'
-        : n < 1000000 ? dollarFormat(n / 1000) + ' billion'
-            : dollarFormat(n / 1000000) + ' trillion'
-}
+var Treebar = d3Kit.factory.createChart(
+  DEFAULT_OPTIONS,
+  CUSTOM_EVENTS,
+  constructor
+);
 
-var options = {
-    key: 'adj_value',
-    country: null
-}
+function constructor(skeleton) {
 
-d3.json('lib/treebard3-0.1/data.json', initialize)
+  var layers = skeleton.getLayerOrganizer();
+  var dispatch = skeleton.getDispatcher();
+  var options = skeleton.options();
 
-function initialize(error, data) {
-    if (error) { throw error }
+  layers.create(['content', 'x-axis', 'y-axis']);
 
-    var root = d3.hierarchy(data).sum(function (d) { return d[options.key] })
-    var yearData = root.children
+  var x0 = d3.scaleBand()
+    .range([0, skeleton.getInnerWidth()]);
+    
+  var x1 = d3.scaleBand()
+    .range([0, skeleton.getInnerWidth()]);
 
-    yearData.sort(function (a, b) { return a.data.year - b.data.year })
+  var y = d3.scaleLinear()
+    .range([0, skeleton.getInnerHeight()]);
 
-    var svg = d3.select('body')
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+  var visualize = d3Kit.helper.debounce(function(){
+    
+    if(!skeleton.hasData()){
+      d3Kit.helper.removeAllChildren(layers.get('content'));
+      return;
+    }
+    
+    var data = skeleton.data();
+    
+    var width = skeleton.getInnerWidth();
+    var height = skeleton.getInnerHeight();
+    
+    var root = d3.hierarchy(data).sum(function (d) { return d[options.key] });
+    var yearData = root.children;
+    yearData.sort(function (a, b) { return a.data.year - b.data.year });
+    
+    x0.domain(d3.extent(data, function(d){return d.x;}))
+      .range([0, skeleton.getInnerWidth()]);
+    y.domain(d3.extent(data, function(d){return d.y;}))
+      .range([skeleton.getInnerHeight(), 0]);
 
-    var x0 = d3.scaleBand()
-        .domain(yearData.map(function (d) { return d.data.year }).sort())
-        .range([0, width])
-        .padding(0.15)
+    var svg = layers.get('content');
+    
+    var selection = layers.get('content').selectAll('circle')
+      .data(data);
 
-    var x1 = d3.scaleBand()
-        .domain(['Imports', 'Exports'])
-        .rangeRound([0, x0.bandwidth()])
-        .paddingInner(0.1)
+    selection.exit().remove();
 
-    var y = d3.scaleLinear()
-        .domain([0, d3.max(yearData, function (d) {
-            return d3.max(d.children, function (e) { return e.value })
-        })]).nice()
-        .range([0, height])
+    var sEnter = selection.enter().append('circle')
+
+    var color = options.color;
+
+    selection.merge(sEnter)
+
+
+    x0.domain(yearData.map(function (d) { return d.data.year }).sort())
+      .padding(0.15);
+
+    x1.domain(['Imports', 'Exports'])
+      .rangeRound([0, x0.bandwidth()])
+      .paddingInner(0.1);
+
+    y.domain([0, d3.max(yearData, function (d) {
+          return d3.max(d.children, function (e) { return e.value })
+      })]).nice();
 
     var x0Axis = d3.axisBottom()
         .scale(x0)
@@ -60,36 +84,32 @@ function initialize(error, data) {
         .scale(x1)
 
     var yAxis = d3.axisLeft()
-        .tickSize(-width)
-        .tickFormat(tickFormat)
-        .scale(y.copy().range([height, 0]))
+        .tickSize(-skeleton.getInnerWidth())
+        .scale(y.copy().range([skeleton.getInnerHeight(), 0]))
 
-    svg.append('g')
-        .attr('class', 'x0 axis')
-        .attr('transform', 'translate(0,' + (height + 22) + ')')
-        .call(x0Axis)
 
-    var gy = svg.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis)
+    layers.get('x-axis')
+      .attr('transform', 'translate(0,' + (skeleton.getInnerHeight()+22) + ')')
+      .call(x0Axis);
+      
+    layers.get('x-axis')
+      .call(x1Axis)
 
-    var years = svg.selectAll('.year')
-        .data(yearData, function (d) { return d.data.year })
-        .enter().append('g')
-        .attr('class', 'year')
-        .attr('transform', function (d) {
-            return 'translate(' + x0(d.data.year) + ',0)'
-        })
+    layers.get('y-axis')
+      .call(yAxis);
+
+    var years = layers.get('x-axis').selectAll('.year')
+      .data(yearData, function (d) { return d.data.year })
+      .enter().append('g')
+      .attr('class', 'year')
+      .attr('transform', function (d) {
+          return 'translate(' + x0(d.data.year) + ',0)'
+      });
 
     years.append('g')
-        .attr('class', 'x1 axis')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(x1Axis)
-
-    d3.select('#inflation-adjusted').on('change', function () {
-        options.key = this.checked ? 'adj_value' : 'value'
-        update()
-    })
+      .attr('class', 'x1 axis')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(x1Axis)
 
     update()
 
@@ -108,7 +128,7 @@ function initialize(error, data) {
 
         // We use a copied Y scale to invert the range for display purposes
         yAxis.scale(y.copy().range([height, 0]))
-        gy.transition(t).call(yAxis)
+        layers.get('y-axis').transition(t).call(yAxis)
 
         var types = years.selectAll('.type')
             .data(function (d) { return d.children },
@@ -133,8 +153,8 @@ function initialize(error, data) {
                 // Note that we can use .each on selections as a way to perform operations
                 // at a given depth of the hierarchy tree.
                 d.children.sort(function (a, b) {
-                    return orderedContinents.indexOf(b.data.continent) -
-                        orderedContinents.indexOf(a.data.continent)
+                    //return orderedContinents.indexOf(b.data.continent) -
+                    //    orderedContinents.indexOf(a.data.continent)
                 })
                 d.children.forEach(function (d) {
                     d.sort(function (a, b) { return b.value - a.value })
@@ -213,4 +233,10 @@ function initialize(error, data) {
             .attr('y', function (d) { return d.value ? d.y0 : d.parent.parent.y1 / 2 })
             .attr('height', function (d) { return d.value ? d.y1 - d.y0 : 0 })
     }
+  }, 10);
+
+  skeleton
+    .on('options', visualize)
+    .on('data', visualize);
 }
+

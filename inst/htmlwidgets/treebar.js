@@ -12,9 +12,12 @@ HTMLWidgets.widget({
 
       renderValue: function(x) {
 
-        // TODO: code to render the widget, e.g.
-        el.innerText = x.message;
-
+        d3.json("lib/treebard3-0.1/data.json", draw);
+        function draw(error, data) {
+          if(error) throw(error);
+          
+          var treebar = new Treebar(el).data(data);
+        }
       },
 
       resize: function(width, height) {

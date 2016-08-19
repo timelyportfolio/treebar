@@ -14,6 +14,16 @@ Authors@R: c(
         , comment = "stacked treemap bar library in htmlwidgets/lib, https://gist.github.com/cmgiven/4541f6de7b6fbef482aaa43f3a71f8d4"
       ),
       person(
+        "Krist", "Wongsuphasawat"
+        , role = c("aut", "cph")
+        , comment = "d3kit library in htmlwidgets/lib, https://github.com/twitter/d3kit"
+      ),
+      person(
+        "Robert", "Harris"
+        , role = c("aut", "cph")
+        , comment = "d3kit library in htmlwidgets/lib, https://github.com/twitter/d3kit"
+      ),
+      person(
         "Kent", "Russell"
         , role = c("aut", "cre")
         , comment = "R interface"
