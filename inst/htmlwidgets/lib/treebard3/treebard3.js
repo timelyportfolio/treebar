@@ -42,15 +42,14 @@ function constructor(skeleton) {
     var width = skeleton.getInnerWidth();
     var height = skeleton.getInnerHeight();
     
-    var root = d3.hierarchy(data).sum(function (d) { return d.value });
+    var root = d3.hierarchy(data)
+      .sum(function (d) { return d.value });
+      
     var depth1Data = root.children;
-    depth1Data.sort(function (a, b) { return a.data.id - b.data.id });
+    depth1Data.sort(function (a, b) {
+      return a.data.id - b.data.id
+    });
     
-    x0.domain(d3.extent(data, function(d){return d.x;}))
-      .range([0, skeleton.getInnerWidth()]);
-    y.domain(d3.extent(data, function(d){return d.y;}))
-      .range([skeleton.getInnerHeight(), 0]);
-
     var svg = layers.get('content');
     
     var selection = layers.get('content').selectAll('circle')
@@ -64,17 +63,28 @@ function constructor(skeleton) {
 
     selection.merge(sEnter)
 
-
     x0.domain(depth1Data.map(function (d) { return d.data.id }).sort())
+      .range([0, width])
       .padding(0.15);
 
-    x1.domain(['Imports', 'Exports'])
+    x1.domain(
+      d3.set(
+        d3.merge(depth1Data.map(
+          function (d) {
+            var ids = d.data.children.map(function(dd){
+              return dd.id;
+            });
+            return ids;
+          }
+        ))).values()
+      )
       .rangeRound([0, x0.bandwidth()])
       .paddingInner(0.1);
 
     y.domain([0, d3.max(depth1Data, function (d) {
           return d3.max(d.children, function (e) { return e.value })
-      })]).nice();
+      })]).nice()
+      .range([0,height]);
 
     var x0Axis = d3.axisBottom()
         .scale(x0)
@@ -86,7 +96,6 @@ function constructor(skeleton) {
     var yAxis = d3.axisLeft()
         .tickSize(-skeleton.getInnerWidth())
         .scale(y.copy().range([skeleton.getInnerHeight(), 0]))
-
 
     layers.get('x-axis')
       .attr('transform', 'translate(0,' + (skeleton.getInnerHeight()+22) + ')')
@@ -113,7 +122,7 @@ function constructor(skeleton) {
     update()
 
     function sum(d) {
-        return !options.country || options.country === d.id ? d.value : 0
+        return !options._selected || options._selected === d.id ? d.value : 0
     }
 
     function update() {
@@ -130,8 +139,13 @@ function constructor(skeleton) {
         layers.get('y-axis').transition(t).call(yAxis)
 
         var depth2 = depth1.selectAll('.depth2')
-            .data(function (d) { return d.children },
-                  function (d) { return d.data.id })
+            .data(function (d) {
+                return d.children
+              },
+              function (d) {
+                return d.data.id;
+              }
+            )
             .each(function (d) {
                 // UPDATE
                 // The copied branches are orphaned from the larger hierarchy, and must be
@@ -151,10 +165,6 @@ function constructor(skeleton) {
                 // ENTER
                 // Note that we can use .each on selections as a way to perform operations
             // at a given depth of the hierarchy tree.
-                d.children.sort(function (a, b) {
-                    //return orderedContinents.indexOf(b.data.id) -
-                    //    orderedContinents.indexOf(a.data.id)
-                })
                 d.children.forEach(function (d) {
                     d.sort(function (a, b) { return b.value - a.value })
                 })
@@ -172,7 +182,9 @@ function constructor(skeleton) {
 
         // d3.hierarchy gives us a convenient way to access the parent datum. This line
         // adds an index property to each node that we'll use for the transition delay.
-        root.each(function (d) { d.index = d.parent ? d.parent.children.indexOf(d) : 0 })
+        root.each(function (d) {
+          d.index = d.parent ? d.parent.children.indexOf(d) : 0
+        })
 
         depth2.transition(t)
             .delay(function (d, i) { return d.parent.index * 150 + i * 50 })
@@ -182,16 +194,26 @@ function constructor(skeleton) {
 
         var depth3 = depth2.selectAll('.depth3')
             // Note that we're using our copied branch.
-            .data(function (d) { return d.treemapRoot.children },
-                  function (d) { return d.data.id })
+            .data(
+              function (d) {
+                return d.treemapRoot.children
+              },
+              function (d) {
+                return d.data.id
+              }
+            )
 
         depth3 = depth3.enter().append('g')
             .attr('class', 'depth3')
             .merge(depth3)
 
         var depth4 = depth3.selectAll('.depth4')
-            .data(function (d) { return d.children },
-                  function (d) { return d.data.id })
+            .data(function (d) {
+              return d.children
+            },
+            function (d) {
+              return d.data.id
+            })
 
         var enterDepth4 = depth4.enter().append('rect')
             .attr('class', 'depth4')
@@ -215,22 +237,31 @@ function constructor(skeleton) {
                 depth4.classed('hover', false)
             })
             .on('click', function (d) {
-                options.country = options.country === d.data.id ? null : d.data.id
+                options._selected = options._selected === d.data.id ? null : d.data.id
                 update()
             })
             .append('title')
             .text(function (d) { return d.data.id })
 
-        depth4.filter(function (d) { return d.data.id === options.country })
+        depth4.filter(function (d) { return d.data.id === options._selected })
             .each(function (d) { d3.select(this.parentNode).raise() })
             .raise()
 
         depth4
             .transition(t)
-            .attr('x', function (d) { return d.value ? d.x0 : x1.bandwidth() / 2 })
-            .attr('width', function (d) { return d.value ? d.x1 - d.x0 : 0 })
-            .attr('y', function (d) { return d.value ? d.y0 : d.parent.parent.y1 / 2 })
-            .attr('height', function (d) { return d.value ? d.y1 - d.y0 : 0 })
+            .attr('x', function (d) {
+              return d.value ? d.x0 : x1.bandwidth() / 2
+            })
+            .attr('width', function (d) {
+              return d.value ? d.x1 - d.x0 : 0
+            })
+            .attr('y', function (d) {
+              return d.value ? d.y0 : d.parent.parent.y1 / 2
+            })
+            .attr('height', function (d) {
+              return d.value ? d.y1 - d.y0 : 0
+            })
+            
     }
   }, 10);
 
