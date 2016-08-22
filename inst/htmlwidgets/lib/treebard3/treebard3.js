@@ -11,7 +11,8 @@ var DEFAULT_OPTIONS = {
 var CUSTOM_EVENTS = [
   "nodeClick",
   "nodeMouseover",
-  "nodeMouseout"
+  "nodeMouseout",
+  "updateComplete"
 ];
 
 var Treebar = d3Kit.factory.createChart(
@@ -281,7 +282,8 @@ function constructor(skeleton) {
             .attr('height', function (d) {
               return d.value ? d.y1 - d.y0 : 0
             })
-            
+        
+        dispatch.apply('updateComplete', this, [skeleton]);
     }
   }, 10);
 
