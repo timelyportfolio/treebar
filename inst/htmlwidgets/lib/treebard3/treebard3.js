@@ -60,16 +60,7 @@ function constructor(skeleton) {
     
     var svg = layers.get('content');
     
-    var selection = layers.get('content').selectAll('circle')
-      .data(data);
-
-    selection.exit().remove();
-
-    var sEnter = selection.enter().append('circle')
-
     var color = options.color;
-
-    selection.merge(sEnter)
 
     x0.domain(depth1Data.map(function (d) { return d.data[options.id] }).sort())
       .range([0, width])

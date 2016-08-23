@@ -30,7 +30,6 @@ HTMLWidgets.widget({
 
       resize: function(width, height) {
 
-        this.renderValue(instance.x);
 
       },
       
