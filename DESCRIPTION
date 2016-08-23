@@ -1,7 +1,7 @@
 Package: treebar
 Title: Interactive 'd3.js' Treemap Bar
-Version: 0.0.0.9000
-Date: 2016-08-18
+Version: 0.1.0
+Date: 2016-08-22
 Authors@R: c(
       person(
         "Mike", "Bostock"
