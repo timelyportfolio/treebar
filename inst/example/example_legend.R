@@ -31,22 +31,26 @@ browsable(
 function(el,x){
   // get our treebar chart
   var chart = HTMLWidgets.getInstance(el).instance.treebar;
-  chart.on('updateComplete',function(chart){
+  chart.on('updateComplete.legend', drawLegend);
+
+  function drawLegend(chart){
     var svg = chart.getSvg();
-debugger;
-    svg.selectAll('.legendOrdinal').data([0]).
-      enter().append('g')
+
+    var legend_el = svg.selectAll('.legendOrdinal').data([0])
+
+    legend_el = legend_el.enter().append('g')
       .attr('class', 'legendOrdinal')
+      .merge(legend_el)
       .attr('transform', 'translate(' + (+chart.width()-200) + ',100)');
     
     var legendOrdinal = d3.legendColor()
       .shapeWidth(30)
       .orient('vertical')
       .scale(chart.options().color);
-
+    
     svg.select('.legendOrdinal')
       .call(legendOrdinal);
-  });
+  };
 }
 "        
         )
