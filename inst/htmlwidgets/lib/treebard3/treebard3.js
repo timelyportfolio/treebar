@@ -226,7 +226,9 @@ function constructor(skeleton) {
         .attr('width', function (d) { return d.value ? d.x1 - d.x0 : 0; })
         .attr('y', 0)
         .attr('height', 0)
-        .style('fill', function (d) { return color(d.parent.data[options.id]); });
+        .style('fill', function (d) {
+          return d.children[0].data.color ? d.children[0].data.color : color(d.parent.data[options.id]);
+        });
 
       depth4
         .on('mouseover', function (d,i) {
