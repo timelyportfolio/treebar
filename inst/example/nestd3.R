@@ -23,7 +23,7 @@ nestd3 <- function(
     data=data,
     nest_cols=c(nonnest_cols[length(nonnest_cols)], value_cols),
     key_col="children"
-  ) %>% change_to_id("name")
+  ) %>% change_to_id()
   
   for(x in rev(colnames(data_nested)[-ncol(data_nested)])){
     data_nested <- tidyr::nest_(
