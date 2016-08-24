@@ -227,7 +227,7 @@ function constructor(skeleton) {
         .attr('y', 0)
         .attr('height', 0)
         .style('fill', function (d) {
-          return d.children[0].data.color ? d.children[0].data.color : color(d.parent.data[options.id]);
+          return (d.data && d.data.color) ? d.data.color : color(d.parent.data[options.id]);
         });
 
       depth4

@@ -49,3 +49,18 @@ browsable(
     )   
   )
 )
+
+
+# play with treemap treepalette
+library(treemap)
+library(treebar)
+library(dplyr)
+
+portfolio %>%
+  mutate(year = as.character(year)) %>%
+  inner_join(treepalette(.,index=c("asset","subasset","ticker"))) %>%
+  mutate(color = HCL.color) %>%
+  select(-starts_with("HCL")) %>%
+  nestd3(value_cols=c("value","color")) %>%
+  jsonlite::toJSON(dataframe="row",auto_unbox=TRUE) %>%
+  treebar()
