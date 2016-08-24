@@ -14,6 +14,12 @@ HTMLWidgets.widget({
         
         instance.x = x;
         
+        // rare case but currently a nesting function
+        //  in R that I have written will supply
+        //  an array, so in case of array, 
+        //  we will take the first element
+        if(Array.isArray(x.data)) x.data = x.data[0];
+        
         // ugly and will fix but for now
         //   empty and re-render in dynamic
         el.innerHTML = "";
