@@ -8,15 +8,19 @@ df <- data.frame(
   profit = runif(length(dates), 100, 10000)
 )
 
-# change our date to be hierarchy of years, quarters, and months
+# change our date to be hierarchy of years, quarters, months, weeks
+#  could easily change weeks to days
 df_hier <- df %>%
   mutate(
     year = format(date, "%Y"),
     quarter = paste0("Qtr",ceiling(as.numeric(format(date,"%m")) / 3)),
     month = format(date, "%b"),
-    day = format(date, "%d")
+    week = format(date, "%U")
   ) %>%
-  select(year, quarter, month, day, profit)
+  select(year, quarter, month, week, profit) %>%
+  group_by(year, quarter, month, week) %>%
+  summarize(profit = sum(profit)) %>%
+  ungroup()
 
 df_hier %>%
   nestd3(value_col="profit") %>%
