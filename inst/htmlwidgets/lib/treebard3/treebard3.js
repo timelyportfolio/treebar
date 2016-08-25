@@ -2,7 +2,7 @@ var DEFAULT_OPTIONS = {
   margin: { top: 15, right: 15, bottom: 40, left: 60 },
   width: 960,
   height: 500,
-  color: d3.scaleOrdinal(d3.schemeCategory10),
+  color: d3.scaleOrdinal(d3.schemeCategory20),
   id: "id",
   value: "value",
   tile: "Squarify"
