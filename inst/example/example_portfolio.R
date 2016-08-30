@@ -61,6 +61,6 @@ portfolio %>%
   inner_join(treepalette(.,index=c("asset","subasset","ticker"))) %>%
   mutate(color = HCL.color) %>%
   select(-starts_with("HCL")) %>%
-  nestd3(value_cols=c("value","color")) %>%
-  jsonlite::toJSON(dataframe="row",auto_unbox=TRUE) %>%
+  d3r::d3_nest(value_cols=c("value","color")) %>%
+  d3r::d3_json %>%
   treebar()

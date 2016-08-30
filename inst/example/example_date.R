@@ -23,6 +23,6 @@ df_hier <- df %>%
   ungroup()
 
 df_hier %>%
-  nestd3(value_col="profit") %>%
-  jsonlite::toJSON(auto_unbox=TRUE, dataframe="row") %>%
+  d3r::d3_nest(value_col="profit") %>%
+  d3r::d3_json() %>%
   treebar(value="profit")

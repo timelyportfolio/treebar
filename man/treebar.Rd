@@ -128,6 +128,21 @@ browsable(
     )   
   )
 )
+
+
+# play with treemap treepalette
+library(treemap)
+library(treebar)
+library(dplyr)
+
+portfolio \%>\%
+  mutate(year = as.character(year)) \%>\%
+  inner_join(treepalette(.,index=c("asset","subasset","ticker"))) \%>\%
+  mutate(color = HCL.color) \%>\%
+  select(-starts_with("HCL")) \%>\%
+  d3r::d3_nest(value_cols=c("value","color")) \%>\%
+  d3r::d3_json \%>\%
+  treebar()
 #devtools::install_github("timelyportfolio/treebar")
 
 library(stringr)

@@ -43,4 +43,6 @@ Suggests:
     jsonlite,
     knitr,
     stringr
+Remotes:
+    timelyportfolio/d3r
 RoxygenNote: 5.0.1

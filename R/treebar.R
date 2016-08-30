@@ -26,12 +26,13 @@ treebar <- function(data=NULL, ..., width = NULL, height = NULL, elementId = NUL
   # create widget
   htmlwidgets::createWidget(
     name = 'treebar',
-    x,
+    x = x,
     width = width,
     height = height,
     package = 'treebar',
     elementId = elementId
   )
+
 }
 
 #' Shiny bindings for treebar
@@ -60,4 +61,14 @@ treebarOutput <- function(outputId, width = '100%', height = '400px'){
 renderTreebar <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
   htmlwidgets::shinyRenderWidget(expr, treebarOutput, env, quoted = TRUE)
+}
+
+#' @keywords internal
+treebar_html <- function(id, style, class, ...){
+  htmltools::attachDependencies(
+    htmltools::tagList(
+      tags$div(id=id, style=style, class=class, ...)
+    ),
+    d3r::d3_dep_v4()
+  )
 }
