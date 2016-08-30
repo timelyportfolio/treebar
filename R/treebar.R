@@ -67,7 +67,7 @@ renderTreebar <- function(expr, env = parent.frame(), quoted = FALSE) {
 treebar_html <- function(id, style, class, ...){
   htmltools::attachDependencies(
     htmltools::tagList(
-      tags$div(id=id, style=style, class=class, ...)
+      htmltools::tags$div(id=id, style=style, class=class, ...)
     ),
     d3r::d3_dep_v4()
   )
