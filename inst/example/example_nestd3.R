@@ -18,15 +18,13 @@ portfolio %>%
 
 portfolio %>%
   d3_nest(value_cols="value", root="portfolio") %>%
-  d3_json() %>%
   treebar()
 
 
 titanic_df <- data.frame(Titanic)
 tit_tb <- titanic_df %>%
   select(Class,Age,Survived,Sex,Freq) %>%
-  d3_nest(value_cols="Freq", root="titanic") %>%
-  d3_json() %>%
+  d3_nest(value_cols="Freq", root="titanic")%>%
   treebar(value = "Freq")
 tit_tb
 

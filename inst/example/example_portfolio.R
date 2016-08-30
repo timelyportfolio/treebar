@@ -62,5 +62,4 @@ portfolio %>%
   mutate(color = HCL.color) %>%
   select(-starts_with("HCL")) %>%
   d3r::d3_nest(value_cols=c("value","color")) %>%
-  d3r::d3_json %>%
   treebar()

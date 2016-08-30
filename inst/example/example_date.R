@@ -24,5 +24,4 @@ df_hier <- df %>%
 
 df_hier %>%
   d3r::d3_nest(value_col="profit") %>%
-  d3r::d3_json() %>%
   treebar(value="profit")

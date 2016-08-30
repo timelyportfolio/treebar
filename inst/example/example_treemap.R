@@ -10,5 +10,4 @@ data_hier <- tidyr:::drop_na(random.hierarchical.data(depth=4)) %>%
   select(-starts_with("HCL"))
 
 d3r::d3_nest(data_hier, value_cols=c("x","color")) %>%
-  d3r::d3_json() %>%
   treebar(value="x")
